@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Configuration résau pour Gentoo et Debian"""
+
+"""
+Configuration résau pour Gentoo et Debian
+
+License Libre
+rod.cat@free.fr
+"""
 
 import os
 
@@ -104,6 +110,7 @@ interface_dic = {}
 print()
 
 def read_gconf(ext=''):
+    """Lecture des fichiers de configuration Gentoo"""
     fichier = '/etc/conf.d/net' + ext
     with open(fichier) as conf_file:
         dns = ''
@@ -141,6 +148,7 @@ def read_gconf(ext=''):
 
 dhcp = False
 def read_dconf(ext=''):
+    """Lecture des fichiers de configuration Debian"""
     fichier = '/etc/network/interfaces' + ext
     with open(fichier) as conf_file:
         for line in conf_file:
