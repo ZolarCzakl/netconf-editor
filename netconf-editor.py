@@ -85,7 +85,7 @@ print('''_ . , ; - « < ` ' " : \ ( [ {| ^!@!^ |} ] ) / : " ' ´ > » - ; , . _'
 print()
 print()
 if root:
-    print('\x1b[1;32mI AM ROOT!\033[1;m')
+    print('\x1b[1;32mI AM ROOT!\x1b[1;0m')
 else:
     print('\x1b[1;31mLancez le script en root')
     print('pour pouvoir modifier les fichiers de configuration')
