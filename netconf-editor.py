@@ -79,24 +79,24 @@ with open('current_config') as cc:
 interface_list = list(interface_dic.keys())
 print()
 print()
-print('                       & ~ NETCONF-EDITOR ~ &')
+print('\x1b[1;32m                       & ~ NETCONF-EDITOR ~ &')
 print()
 print('''_ . , ; - « < ` ' " : \ ( [ {| ^!@!^ |} ] ) / : " ' ´ > » - ; , . _''')
 print()
 print()
 if root:
-    print('I AM ROOT!')
+    print('\x1b[1;32mI AM ROOT!\033[1;m')
 else:
-    print('Lancez le script en root')
+    print('\x1b[1;31mLancez le script en root')
     print('pour pouvoir modifier les fichiers de configuration')
 print()
-print('interfaces réseau trouvées par la commande ip:')
+print('\x1b[1;32minterfaces réseau trouvées par la commande ip:\x1b[0m')
 for i in interface_list:
     print('  {}'.format(i))
     print('    {}/{}'.format(interface_dic[i][0], interface_dic[i][1]))
     print('    {}'.format(interface_dic[i][2]))
 print('***')
-print('Quelle est votre distibution?')
+print('\x1b[1;34mQuelle est votre distibution?\x1b[0m')
 print('  Gentoo -> 1 /etc/conf.d/net')
 print('  Debian -> 2 /etc/network/interfaces')
 #print('  Redhat -> 3 ')
@@ -105,7 +105,7 @@ while True:
     if distrib == '1' or distrib == '2':
         break
     else:
-        print('Choisissez 1 ou 2')
+        print('\x1b[1;31mChoisissez 1 ou 2\x1b[0m')
 interface_dic = {}
 print()
 
@@ -200,7 +200,7 @@ with open('sauvegarde') as sg:
 
 interface_list = list(interface_dic.keys())
 for i in interface_list:
-    print('Interface réseau {}:'.format(i))
+    print('\x1b[1;32mInterface réseau {}:\x1b[0m'.format(i))
     if dhcp:
         print('    dhcp')
     else:
@@ -212,7 +212,8 @@ for i in interface_list:
         except IndexError:
             pass
 print('***')
-save = input('sauvegarder la configuration actuelle? [Oui|Non]: ')
+save = input(
+    '\x1b[1;34msauvegarder la configuration actuelle? [Oui|Non]: \x1b[0m')
 if len(save) > 0 and save[0].lower() == 'o':
     print('    Choississez un nom pour votre sauvegarde')
     print("    il servirat à la rappeler")
@@ -238,13 +239,14 @@ if len(save_list) > 0:
     print()
 
 new = False
-
-print('Charger une sauvegarde ou configurer une nouvelle connexion?')
+message = '\x1b[1;34mCharger une sauvegarde ou configurer une nouvelle '
+message += 'connexion?\x1b[0m'
+print(message)
 while True:
     load = input('C pour charger, N pour nouvelle: ')
     if load.upper() == 'C':
         if not saves:
-            print('Pas de sauvegarde')
+            print('\x1b[1;31mPas de sauvegarde\x1b[0m')
         else:
             new = False
             break
@@ -252,9 +254,9 @@ while True:
         new = True
         break
     else:
-        print('C ou N')
+        print('\x1b[1;31mC ou N\x1b[0m')
 if new:
-    print('Choisissez une interface réseau à configurer')
+    print('\x1b[1;34mChoisissez une interface réseau à configurer\x1b[0m')
     pos = 0
     for i in interface_list:
         print(i, '->', pos)
@@ -265,14 +267,15 @@ if new:
             if int(carte_index) >= 0 and int(carte_index) < len(interface_list):
                 break
             else:
-                print('Un chiffre à partir de 0 ou tapez Entrée')
+                print(
+                    '\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
         elif carte_index == '':
             carte_index = '0'
             break
         else:
-            print('Un chiffre à partir de 0 ou tapez Entrée')
+            print('\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
     carte_reseau = interface_list[int(carte_index)]
-    print('Quelle type de connexion?')
+    print('\x1b[1;34mQuelle type de connexion?\x1b[0m')
     print('  DHCP -> 1')
     print('  manuelle -> 2')
     while True:
@@ -280,7 +283,7 @@ if new:
         if con_mod == '1' or con_mod == '2':
             break
         else:
-            print('Choisissez 1 ou 2')
+            print('\x1b[1;31mChoisissez 1 ou 2\x1b[0m')
 
     if con_mod == '2':
         def ip_check(ip):
@@ -297,16 +300,16 @@ if new:
             return(test)
 
         def print_ad():
-            print('adresse invalide')
+            print('\x1b[1;31madresse invalide\x1b[0m')
 
         while True:
-            ip = input("Entrez l'adresse ip: ")
+            ip = input("\x1b[1;34mEntrez l'adresse ip: \x1b[0m")
             if ip_check(ip):
                 break
             else:
                 print_ad()
 
-        print('Entrez un masque de sous-réseau')
+        print('\x1b[1;34mEntrez un masque de sous-réseau\x1b[0m')
 
         while True:
             masq = input('/cidr ou notation pointée: ')
@@ -327,28 +330,30 @@ if new:
                     print_ad()
 
         while True:
-            route = input('Entrez une passerelle par défaut: ')
+            route = input('\x1b[1;34mEntrez une passerelle par défaut: \x1b[0m')
             if ip_check(route):
                 break
             else:
                 print_ad()
 
         while True:
-            dns1 = input('Entrez un premier dns: ')
+            dns1 = input('\x1b[1;34mEntrez un premier dns: \x1b[0m')
             if ip_check(dns1):
                 break
             else:
                 print_ad()
 
         while True:
-            dns2 = input('et un deuxième: ')
+            dns2 = input('\x1b[1;34met un deuxième: \x1b[0m')
             if ip_check(dns2):
                 break
             else:
                 print_ad()
 
     set_proxy = False
-    proxy = input('Souhaitez-vous configurer un accès via proxy? [Oui|Non]: ')
+    message = '\x1b[1;34mSouhaitez-vous configurer un accès via proxy?'
+    message += '[Oui|Non]: \x1b[0m'
+    proxy = input(message)
     if len(proxy) > 0 and proxy[0].lower() == 'o':
         while True:
             print('xxx.xxx.xxx.xxx:xxxx')
@@ -363,7 +368,7 @@ if new:
             else:
                 print_ad()
     print()
-    print('Interface réseau: {}'.format(carte_reseau))
+    print('\x1b[1;32mInterface réseau: {}\x1b[0m'.format(carte_reseau))
     if con_mod == '2':
         print('    ip = {}/{}'.format(ip, masq))
         print('    passerelle = {}'.format(route))
@@ -374,9 +379,12 @@ if new:
     if set_proxy:
         print('    proxy = {}'.format(proxy))
     print()
-    go = input('Activer cette configuration maintenant? [Oui|Non]: ')
+    go = input(
+        '\x1b[1;34mActiver cette configuration maintenant? [Oui|Non]: \x1b[0m')
     if len(go) > 0 and go[0].lower() == 'o':
-        print('Les fichiers de configuration concernés vont être modifiés!')
+        message = '\x1b[1;31mLes fichiers de configuration concernés '
+        message += 'vont être modifiés!\x1b[0m'
+        print(message)
         go = input('Confirmer? [Oui|Non]: ')
         if len(go) > 0 and go[0].lower() == 'o':
             if distrib == '1':
@@ -436,7 +444,7 @@ if new:
                               ).format(proxy)
                     os.system(action)
 else:
-    print('Entrez le n° de la sauvegarde à charger')
+    print('\x1b[1;34mEntrez le n° de la sauvegarde à charger\x1b[0m')
     ind = input(': ')
     print()
     extension = save_list[int(ind)]
@@ -447,7 +455,7 @@ else:
         read_dconf('.' + extension)
     interface_list = list(interface_dic.keys())
     for i in interface_list:
-        print('Interface réseau {}:'.format(i))
+        print('\x1b[1;32mInterface réseau {}:\x1b[0m'.format(i))
         if dhcp:
             print('    dhcp')
         else:
@@ -460,7 +468,7 @@ else:
             except IndexError:
                 pass
     print()
-    load = input('Charger cette sauvegarde [Oui|Non]?')
+    load = input('\x1b[1;34mCharger cette sauvegarde [Oui|Non]?\x1b[0m')
     if load.lower() == 'o':
         if distrib == '1':
             action = 'cp /etc/conf.d/net.' + extension + ' /etc/conf.d/net'
@@ -474,7 +482,7 @@ else:
             action = 'cp /etc/apt/apt.conf.' + extension + ' /etc/apt/apt.conf'
             os.system(action)
 print()
-print('Choisissez une interface a redemarrer')
+print('\x1b[1;34mChoisissez une interface a redemarrer\x1b[0m')
 pos = 0
 for i in interface_list:
     print(i, '->', pos)
@@ -485,12 +493,12 @@ while True:
         if int(carte_index) >= 0 and int(carte_index) < len(interface_list):
             break
         else:
-            print('Un chiffre à partir de 0 ou tapez Entrée')
+            print('\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
     elif carte_index == '':
         carte_index = '0'
         break
     else:
-        print('Un chiffre à partir de 0 ou tapez Entrée')
+        print('\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
 carte_reseau = interface_list[int(carte_index)]
 if distrib == '1':
     os.system('/etc/init.d/net.{} stop'.format(carte_reseau))
@@ -502,7 +510,7 @@ os.system('ping -c 3 google.com')
 os.system('rm current_config')
 os.system('rm sauvegarde')
 
-print('Done!')
+print('\x1b[1;32mDone!\x1b[0m')
 
 
 
