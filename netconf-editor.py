@@ -42,73 +42,6 @@ def from_cidr(cidr):
     masq = oct1 + "." + oct2 + "." + oct3 + "." + oct4
     return(masq)
 
-#Récupération de la config actuelle via 'ip'
-os.system('touch current_config')
-os.system('whoami > current_config')
-os.system('ip route >> current_config')
-os.system('ip a >> current_config')
-#os.system('export | grep proxy >> current_config')
-
-root = False
-with open('current_config') as cc:
-    interface_dic = {}
-    name_int = ''
-    route = ''
-    for line in cc:
-        if 'root' in line:
-            root = True
-        if line[0] != ' ':
-            if line[0].isdigit() and line[1] == ':':
-                if int(line[0]) > 1:
-                    for i in line[3:]:
-                        if i == ':':
-                            break
-                        else:
-                            name_int += i
-            elif 'default' in line:
-                route = line.split(' ')[2]
-        elif name_int != '':
-            if 'inet ' in line:
-                slash_index = line.index('/')
-                ip = line[9:slash_index]
-                masq = line[slash_index + 1:slash_index + 3]
-                if masq[1] == ' ':
-                    masq = masq[0]
-                interface_dic[name_int] = [ip, masq, route]
-
-interface_list = list(interface_dic.keys())
-print()
-print()
-print('\x1b[1;32m                       & ~ NETCONF-EDITOR ~ &')
-print()
-print('''_ . , ; - « < ` ' " : \ ( [ {| ^!@!^ |} ] ) / : " ' ´ > » - ; , . _''')
-print()
-print()
-if root:
-    print('\x1b[1;32mI AM ROOT!\x1b[0m')
-else:
-    print('\x1b[1;31mLancez le script en root')
-    print('pour pouvoir modifier les fichiers de configuration')
-print()
-print('\x1b[1;32minterfaces réseau trouvées par la commande ip:\x1b[0m')
-for i in interface_list:
-    print('  {}'.format(i))
-    print('    {}/{}'.format(interface_dic[i][0], interface_dic[i][1]))
-    print('    {}'.format(interface_dic[i][2]))
-print('***')
-print('\x1b[1;34mQuelle est votre distibution?\x1b[0m')
-print('  Gentoo -> 1 /etc/conf.d/net')
-print('  Debian -> 2 /etc/network/interfaces')
-#print('  Redhat -> 3 ')
-while True:
-    distrib = input('Entrez votre choix: ')
-    if distrib == '1' or distrib == '2':
-        break
-    else:
-        print('\x1b[1;31mChoisissez 1 ou 2\x1b[0m')
-interface_dic = {}
-print()
-
 def read_gconf(ext=''):
     """Lecture des fichiers de configuration Gentoo"""
     fichier = '/etc/conf.d/net' + ext
@@ -145,8 +78,19 @@ def read_gconf(ext=''):
                     if 'search' in line or 'nameserver' in line:
                         dns.append(line.split(' ')[1][:-1])
             interface_dic[name_int].append(dns)
+    os.system('ls -l /etc/env.d/ > current_config')
+    with open('current_config') as cc:
+        for line in cc:
+            if '99proxy' in line:
+                with open('/etc/env.d/99proxy') as f:
+                    for line in f:
+                        if 'proxy' in line:
+                            if '/' in line:
+                                current_proxy = line.split('/')[-1][:-1]
+                            else:
+                                current_proxy = line.split('"')[-2]        
 
-dhcp = False
+
 def read_dconf(ext=''):
     """Lecture des fichiers de configuration Debian"""
     fichier = '/etc/network/interfaces' + ext
@@ -184,7 +128,88 @@ def read_dconf(ext=''):
     except:
         pass
 
-os.system('touch sauvegarde')
+def ip_check(ip):
+    """Test la validité du format de l'adresse"""
+    test = True
+    check = ip.split('.')
+    if len(check) != 4:
+        test = False
+    else:
+        for i in check:
+            if i.isdigit():
+                pass
+            else:
+                test = False
+    return(test)
+
+#    Récupération de la configuration actuelle via 'ip'
+os.system('whoami > current_config')
+os.system('ip route >> current_config')
+os.system('ip a >> current_config')
+
+root = False
+interface_dic = {}
+current_proxy = False
+dhcp = False
+
+with open('current_config') as cc:
+    interface_dic = {}
+    name_int = ''
+    route = ''
+    for line in cc:
+        if 'root' in line:
+            root = True
+        if line[0] != ' ':
+            if line[0].isdigit() and line[1] == ':':
+                if int(line[0]) > 1:
+                    for i in line[3:]:
+                        if i == ':':
+                            break
+                        else:
+                            name_int += i
+            elif 'default' in line:
+                route = line.split(' ')[2]
+        elif name_int != '':
+            if 'inet ' in line:
+                slash_index = line.index('/')
+                ip = line[9:slash_index]
+                masq = line[slash_index + 1:slash_index + 3]
+                if masq[1] == ' ':
+                    masq = masq[0]
+                interface_dic[name_int] = [ip, masq, route]
+
+interface_list = list(interface_dic.keys())
+#    Accueil
+print()
+print()
+print('\x1b[1;32m                       & ~ NETCONF-EDITOR ~ &')
+print()
+print('''_ . , ; - « < ` ' " : \ ( [ {| ^!@!^ |} ] ) / : " ' ´ > » - ; , . _''')
+print()
+print()
+if root:
+    print('\x1b[1;32mI AM ROOT!\x1b[0m')
+else:
+    print('\x1b[1;31mLancez le script en root')
+    print('pour pouvoir modifier les fichiers de configuration')
+print()
+print('\x1b[1;32minterfaces réseau trouvées par la commande ip:\x1b[0m')
+for i in interface_list:
+    print('  {}'.format(i))
+    print('    {}/{}'.format(interface_dic[i][0], interface_dic[i][1]))
+    print('    {}'.format(interface_dic[i][2]))
+print('***')
+print('\x1b[1;34mQuelle est votre distribution?\x1b[0m')
+print('  Gentoo -> 1 /etc/conf.d/net')
+print('  Debian -> 2 /etc/network/interfaces')
+
+while True:
+    distrib = input('Entrez votre choix: ')
+    if distrib == '1' or distrib == '2':
+        break
+    else:
+        print('\x1b[1;31mChoisissez 1 ou 2\x1b[0m')
+print()
 if distrib == '1':
     read_gconf()
     os.system('ls /etc/conf.d | grep net. > sauvegarde')
@@ -197,7 +222,6 @@ with open('sauvegarde') as sg:
         if '.' in line:
             if len(line.split('.')[-1][:-1]) > 1:
                 save_list.append(line.split('.')[-1][:-1])
-
 interface_list = list(interface_dic.keys())
 for i in interface_list:
     print('\x1b[1;32mInterface réseau {}:\x1b[0m'.format(i))
@@ -215,11 +239,12 @@ print('***')
 save = input(
     '\x1b[1;34msauvegarder la configuration actuelle? [Oui|Non]: \x1b[0m')
 if len(save) > 0 and save[0].lower() == 'o':
-    print('    Choississez un nom pour votre sauvegarde')
-    print("    il servirat à la rappeler")
+    print('    Choisissez un nom pour votre sauvegarde')
+    print("    il servira à la rappeler")
     extension = input('Entrez un nom (simple) pour la sauvegarde: ')
     if distrib == '1':
-        action = 'cp /etc/conf.d/net /etc/conf.d/net.{}'.format(extension)
+        os.system('cp /etc/conf.d/net /etc/conf.d/net.{}'.format(extension))
+        action = 'cp /etc/env.d/99proxy /etc/env.d.99proxy.{}'.format(extension)
         os.system(action)
     elif distrib == '2':
         action = 'cp /etc/network/interfaces'
@@ -255,6 +280,7 @@ while True:
         break
     else:
         print('\x1b[1;31mC ou N\x1b[0m')
+#    Nouvelle configuration
 if new:
     print('\x1b[1;34mChoisissez une interface réseau à configurer\x1b[0m')
     pos = 0
@@ -284,33 +310,16 @@ if new:
             break
         else:
             print('\x1b[1;31mChoisissez 1 ou 2\x1b[0m')
-
     if con_mod == '2':
-        def ip_check(ip):
-            test = True
-            check = ip.split('.')
-            if len(check) != 4:
-                test = False
-            else:
-                for i in check:
-                    if i.isdigit():
-                        pass
-                    else:
-                        test = False
-            return(test)
-
         def print_ad():
             print('\x1b[1;31madresse invalide\x1b[0m')
-
         while True:
             ip = input("\x1b[1;34mEntrez l'adresse ip: \x1b[0m")
             if ip_check(ip):
                 break
             else:
                 print_ad()
-
         print('\x1b[1;34mEntrez un masque de sous-réseau\x1b[0m')
-
         while True:
             masq = input('/cidr ou notation pointée: ')
             if masq == '':
@@ -328,28 +337,25 @@ if new:
                     break
                 else:
                     print_ad()
-
         while True:
             route = input('\x1b[1;34mEntrez une passerelle par défaut: \x1b[0m')
             if ip_check(route):
                 break
             else:
                 print_ad()
-
         while True:
             dns1 = input('\x1b[1;34mEntrez un premier dns: \x1b[0m')
             if ip_check(dns1):
                 break
             else:
                 print_ad()
-
         while True:
             dns2 = input('\x1b[1;34met un deuxième: \x1b[0m')
             if ip_check(dns2):
                 break
             else:
                 print_ad()
-
+#    Configuration de l'accès via proxy
     set_proxy = False
     message = '\x1b[1;34mSouhaitez-vous configurer un accès via proxy?'
     message += '[Oui|Non]: \x1b[0m'
@@ -379,6 +385,7 @@ if new:
     if set_proxy:
         print('    proxy = {}'.format(proxy))
     print()
+#    Chargement de la nouvelle configuration
     go = input(
         '\x1b[1;34mActiver cette configuration maintenant? [Oui|Non]: \x1b[0m')
     if len(go) > 0 and go[0].lower() == 'o':
@@ -402,14 +409,16 @@ if new:
                         etc.write(gw + '\n')
                         etc.write(dn + '\n')
                 if set_proxy:
-                    https = 'export https_proxy="https://{}"'.format(proxy)
-                    http = 'export http_proxy="http://{}"'.format(proxy)
-                    ftp = 'export ftp_proxy="http://{}"'.format(proxy)
-                    rsync = 'export RSYNC_PROXY="{}"'.format(proxy)
-                    os.system(https)
-                    os.system(http)
-                    os.system(ftp)
-                    os.system(rsync)
+                    with open('/etc/env.d/99proxy', 'w') as etc:                
+                        https = 'https_proxy="https://{}"'.format(proxy)
+                        http = 'http_proxy="http://{}"'.format(proxy)
+                        ftp = 'ftp_proxy="http://{}"'.format(proxy)
+                        rsync = 'RSYNC_PROXY="{}"'.format(proxy)
+                        etc.write(https + '\n')
+                        etc.write(http + '\n')
+                        etc.write(ftp + '\n')
+                        etc.write(rsync + '\n')
+                    os.system('env-update && source /etc/profile')
             else:
                 if con_mod == '1':
                     with open('/etc/network/interfaces', 'w') as etc:
@@ -443,6 +452,7 @@ if new:
                     action = ('echo "ftp_proxy=ftp://{}" >> /etc/environment'
                               ).format(proxy)
                     os.system(action)
+#    Chargement d'une sauvegarde
 else:
     print('\x1b[1;34mEntrez le n° de la sauvegarde à charger\x1b[0m')
     ind = input(': ')
@@ -473,6 +483,9 @@ else:
         if distrib == '1':
             action = 'cp /etc/conf.d/net.' + extension + ' /etc/conf.d/net'
             os.system(action)
+            action = 'cp /etc/env.d/99proxy.' + extension
+            action += ' /etc/env.d/99proxy'
+            os.system(action)
         elif distrib == '2':
             action = 'cp /etc/network/interfaces.' + extension
             action += ' /etc/network/interfaces'
@@ -482,6 +495,7 @@ else:
             action = 'cp /etc/apt/apt.conf.' + extension + ' /etc/apt/apt.conf'
             os.system(action)
 print()
+#    Redémarrage du réseau
 print('\x1b[1;34mChoisissez une interface a redemarrer\x1b[0m')
 pos = 0
 for i in interface_list:
@@ -509,8 +523,8 @@ elif distrib == '2':
 os.system('ping -c 3 google.com')
 os.system('rm current_config')
 os.system('rm sauvegarde')
-
-print('\x1b[1;32mDone!\x1b[0m')
+print('\x1b[1;32mVous devrez peut-être redémarrer votre session')
+print('Done!\x1b[0m')
 
 
 
