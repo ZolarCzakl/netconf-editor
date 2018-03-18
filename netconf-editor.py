@@ -55,7 +55,9 @@ def read_gconf(ext=''):
                     egal_index = line.index('=')
                     name_int = line[7:egal_index]
                     split_line = line.split(' ')
-                    if len(split_line) == 1:
+                    if 'dhcp' in line:
+                        dhcp = True
+                    elif len(split_line) == 1:
                         slash_index = line.index('/')
                         ip = line[egal_index + 2:slash_index]
                         masq = line.split('/')[1][:-2]
@@ -396,7 +398,8 @@ if new:
         if len(go) > 0 and go[0].lower() == 'o':
             if distrib == '1':
                 if con_mod == '1':
-                    os.system('dhcpd {}'.format(carte_reseau))
+                    with open('etc/conf.d/net', 'w') as etc:
+                        etc.write('config_{}="dhcp"'.format(carte_reseau))
                 else:
                     config = 'config_{}="{}/{}"'.format(carte_reseau, ip, masq)
                     gw = 'routes_{}="default via {}"'.format(
@@ -496,28 +499,30 @@ else:
             os.system(action)
 print()
 #    Redémarrage du réseau
-print('\x1b[1;34mChoisissez une interface a redemarrer\x1b[0m')
-pos = 0
-for i in interface_list:
-    print(i, '->', pos)
-    pos += 1
-while True:
-    carte_index = input(': ')
-    if carte_index.isdigit():
-        if int(carte_index) >= 0 and int(carte_index) < len(interface_list):
+if distrib == '1':
+    print('\x1b[1;34mChoisissez une interface a redemarrer\x1b[0m')
+    pos = 0
+    for i in interface_list:
+        print(i, '->', pos)
+        pos += 1
+    while True:
+        carte_index = input(': ')
+        if carte_index.isdigit():
+            if int(carte_index) >= 0 and int(carte_index) < len(interface_list):
+                break
+            else:
+                print('\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
+        elif carte_index == '':
+            carte_index = '0'
             break
         else:
             print('\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
-    elif carte_index == '':
-        carte_index = '0'
-        break
-    else:
-        print('\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
-carte_reseau = interface_list[int(carte_index)]
-if distrib == '1':
-    os.system('/etc/init.d/net.{} stop'.format(carte_reseau))
-    os.system('/etc/init.d/net.{} start'.format(carte_reseau))
+    carte_reseau = interface_list[int(carte_index)]
+    if distrib == '1':
+        os.system('/etc/init.d/net.{} stop'.format(carte_reseau))
+        os.system('/etc/init.d/net.{} start'.format(carte_reseau))
 elif distrib == '2':
+    print('\x1b[1;32mRedémarrage du réseau\x1b[0m')
     os.system('/etc/init.d/networking restart')
     
 os.system('ping -c 3 google.com')
