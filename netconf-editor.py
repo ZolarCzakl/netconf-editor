@@ -437,8 +437,8 @@ if new:
                         etc.write('    netmask {}\n'.format(masq))
                         etc.write('    gateway {}\n'.format(route))
                     with open('/etc/resolv.conf', 'w') as res:
-                        etc.write('nameserver {}\n'.format(dns1))
-                        etc.write('nameserver {}\n'.format(dns2))
+                        res.write('nameserver {}\n'.format(dns1))
+                        res.write('nameserver {}\n'.format(dns2))
                 if set_proxy:
                     with open('/etc/apt/apt.conf', 'w') as apt:
                         http = 'Acquire::https::proxy "https://{}";'.format(
