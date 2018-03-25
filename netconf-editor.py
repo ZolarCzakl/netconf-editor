@@ -244,7 +244,7 @@ if len(save) > 0 and save[0].lower() == 'o':
     extension = input('Entrez un nom (simple) pour la sauvegarde: ')
     if distrib == '1':
         os.system('cp /etc/conf.d/net /etc/conf.d/net.{}'.format(extension))
-        action = 'cp /etc/env.d/99proxy /etc/env.d.99proxy.{}'.format(extension)
+        action = 'mv /etc/env.d/99proxy /var/proxy/99proxy.{}'.format(extension)
         os.system(action)
     elif distrib == '2':
         action = 'cp /etc/network/interfaces'
@@ -419,6 +419,8 @@ if new:
                         etc.write(ftp + '\n')
                         etc.write(rsync + '\n')
                     os.system('env-update && source /etc/profile')
+                else:
+                    os.system('rm /etc/env.d/99proxy')
             else:
                 if con_mod == '1':
                     with open('/etc/network/interfaces', 'w') as etc:
@@ -483,7 +485,7 @@ else:
         if distrib == '1':
             action = 'cp /etc/conf.d/net.' + extension + ' /etc/conf.d/net'
             os.system(action)
-            action = 'cp /etc/env.d/99proxy.' + extension
+            action = 'cp /var/proxy/99proxy.' + extension
             action += ' /etc/env.d/99proxy'
             os.system(action)
         elif distrib == '2':
