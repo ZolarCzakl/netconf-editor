@@ -246,11 +246,8 @@ if len(save) > 0 and save[0].lower() == 'o':
     extension = input('Entrez un nom (simple) pour la sauvegarde: ')
     if distrib == '1':
         os.system('cp /etc/conf.d/net /etc/conf.d/net.{}'.format(extension))
-        if current_proxy:
-            action = 'cp /etc/env.d/99proxy'
-            action += ' /var/proxy/99proxy.{}'.format(extension)
-            os.system(action)
-            os.system('cp /etc/wgetrc /etc/wgetrc.{}'.format(extension))
+        action = 'cp /etc/env.d/99proxy /etc/env.d.99proxy.{}'.format(extension)
+        os.system(action)
     elif distrib == '2':
         action = 'cp /etc/network/interfaces'
         action += ' /etc/network/interfaces.{}'.format(extension)
@@ -424,17 +421,7 @@ if new:
                         etc.write(http + '\n')
                         etc.write(ftp + '\n')
                         etc.write(rsync + '\n')
-                    with open('/etc/wgetrc', 'w') as etc:
-                        https = 'https_proxy = http://{}'.format(proxy)
-                        http = 'http_proxy = http://{}'.format(proxy)
-                        ftp = 'ftp_proxy = http://{}'.format(proxy)
-                        etc.write(https + '\n')
-                        etc.write(http + '\n')
-                        etc.write(ftp + '\n')
-                        etc.write('use_proxy = on')                        
                     os.system('env-update && source /etc/profile')
-                else:
-                    os.system('rm /etc/env.d/99proxy')
             else:
                 if con_mod == '1':
                     with open('/etc/network/interfaces', 'w') as etc:
@@ -497,11 +484,11 @@ else:
     load = input('\x1b[1;34mCharger cette sauvegarde [Oui|Non]?\x1b[0m')
     if load.lower() == 'o':
         if distrib == '1':
-            os.system('cp /etc/conf.d/net.' + extension + ' /etc/conf.d/net')
-            action = 'cp /var/proxy/99proxy.' + extension
+            action = 'cp /etc/conf.d/net.' + extension + ' /etc/conf.d/net'
+            os.system(action)
+            action = 'cp /etc/env.d/99proxy.' + extension
             action += ' /etc/env.d/99proxy'
             os.system(action)
-            os.system('cp /etc/wgetrc.' + extension + ' /etc/wgetrc')
         elif distrib == '2':
             action = 'cp /etc/network/interfaces.' + extension
             action += ' /etc/network/interfaces'
