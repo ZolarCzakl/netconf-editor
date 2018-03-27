@@ -88,10 +88,13 @@ def read_gconf(ext=''):
                     for line in f:
                         if 'proxy' in line:
                             if '/' in line:
-                                current_proxy = line.split('/')[-1][:-1]
+                                current_proxy = line.split('/')[-1][:-2]
+                                interface_dic[name_int].append(current_proxy)
+                                break
                             else:
-                                current_proxy = line.split('"')[-2]        
-
+                                current_proxy = line.split('"')[-2]
+                                interface_dic[name_int].append(current_proxy)
+                                break
 
 def read_dconf(ext=''):
     """Lecture des fichiers de configuration Debian"""
@@ -155,7 +158,7 @@ current_proxy = False
 dhcp = False
 
 with open('current_config') as cc:
-    interface_dic = {}
+#    interface_dic = {}
     name_int = ''
     route = ''
     for line in cc:
@@ -201,16 +204,15 @@ for i in interface_list:
     print('    {}/{}'.format(interface_dic[i][0], interface_dic[i][1]))
     print('    {}'.format(interface_dic[i][2]))
 print('***')
-print('\x1b[1;34mQuelle est votre distribution?\x1b[0m')
-print('  Gentoo -> 1 /etc/conf.d/net')
-print('  Debian -> 2 /etc/network/interfaces')
-
-while True:
-    distrib = input('Entrez votre choix: ')
-    if distrib == '1' or distrib == '2':
-        break
-    else:
-        print('\x1b[1;31mChoisissez 1 ou 2\x1b[0m')
+current_os = str(os.uname())
+if 'gentoo' in current_os:
+    distrib = '1'
+    print('\x1b[1;32mGentoo\x1b[0m')
+elif 'debian' in current_os or 'ubuntu' in current_os:
+    distrib = '2'
+    print('x1b[1;32mDebian\x1b[0m')
+else:
+    print('\x1b[1;31mDistribution non supportée\x1b[0m')
 print()
 if distrib == '1':
     read_gconf()
@@ -226,6 +228,10 @@ with open('sauvegarde') as sg:
                 save_list.append(line.split('.')[-1][:-1])
 interface_list = list(interface_dic.keys())
 for i in interface_list:
+    if len(interface_dic[i]) > 4:
+        current_proxy = interface_dic[i][4]
+        break
+for i in interface_list:
     print('\x1b[1;32mInterface réseau {}:\x1b[0m'.format(i))
     if dhcp:
         print('    dhcp')
@@ -233,10 +239,15 @@ for i in interface_list:
         print('    ip = {}/{}'.format(interface_dic[i][0], interface_dic[i][1]))
         print('    passerelle = {}'.format(interface_dic[i][2]))
         try:
-            for i in interface_dic[i][3]:
-                print('    dns = {}'.format(i))
+            for d in interface_dic[i][3]:
+                print('    dns = {}'.format(d))
         except IndexError:
             pass
+        try:
+            print('    proxy = {}'.format(interface_dic[i][4]))
+        except IndexError:
+            pass
+        
 print('***')
 save = input(
     '\x1b[1;34msauvegarder la configuration actuelle? [Oui|Non]: \x1b[0m')
@@ -262,7 +273,7 @@ saves = False
 if len(save_list) > 0:
     saves = True
     save_ind = 0
-    print('Sauvegardes actuelles: ')
+    print('\x1b[1;32mSauvegardes actuelles: \x1b[0m')
     for i in save_list:
         print('    {} -> {}'.format(i, save_ind))
         save_ind += 1
@@ -401,7 +412,7 @@ if new:
         if len(go) > 0 and go[0].lower() == 'o':
             if distrib == '1':
                 if con_mod == '1':
-                    with open('etc/conf.d/net', 'w') as etc:
+                    with open('/etc/conf.d/net', 'w') as etc:
                         etc.write('config_{}="dhcp"'.format(carte_reseau))
                 else:
                     config = 'config_{}="{}/{}"'.format(carte_reseau, ip, masq)
@@ -524,7 +535,8 @@ if distrib == '1':
             if int(carte_index) >= 0 and int(carte_index) < len(interface_list):
                 break
             else:
-                print('\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
+                print(
+                    '\x1b[1;31mUn chiffre à partir de 0 ou tapez Entrée\x1b[0m')
         elif carte_index == '':
             carte_index = '0'
             break
